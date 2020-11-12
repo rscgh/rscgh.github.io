@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Swipe between maps</title>
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<script src="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+	<link href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css" rel="stylesheet" />
+	<style>
+		body { margin: 0; padding: 0; };
+		#map { position: absolute; top: 0; bottom: 0; width: 100%; };
+
+
+
+	</style>
+</head>
+<body>
+	<style>
+		body {
+			overflow: hidden;
+		}
+
+		body * {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+
+		.map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+	</style>
+	<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.js"></script>
+	<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.css" type="text/css"/>
+
+
+	<nav id="menu"></nav>
+
+	<div id="comparison-container">
+		<div id="before" class="map"></div>
+		<div id="after" class="map"></div>
+	</div>
+
+
+
+
+	<script>
+
+		mapboxgl.accessToken = 'pk.eyJ1IjoibWFuZnJlZGthdXNoIiwiYSI6Im8yLWJITmMifQ.QZY-vZGYNs955DKglRYt8g';
+
+		var toggleableLayerIds = ['imgtiff2', 'imgtiff1'];
+		var display_layer_names = ['1672 - Jovin Paris Map', '1853 - PreHaussmanian Paris'];
+		var start_indx = 0;
+		var current_map_indx = -1;
+
+
+		var beforeMap = new mapboxgl.Map({
+			container: 'before',
+			//style: 'mapbox://styles/mapbox/light-v10', 'streets-v11' 'mapbox://styles/mapbox/satellite-v9'
+			style: 'mapbox://styles/mapbox/satellite-v9',
+			center: [2.3522, 48.8566], // starting position [lng, lat]
+			zoom: 13
+		});
+
+		var afterMap = new mapboxgl.Map({
+			container: 'after',
+			style: 'mapbox://styles/mapbox/streets-v11',
+			center: [2.3522, 48.8566], // starting position [lng, lat]
+			zoom: 13 // starting zoom
+		});
+
+		afterMap.on('load', function () {
+			afterMap.addSource("PreHaussmann_1853", {  "type": "raster", "tiles": ["https://api.mapbox.com/v4/manfredkaush.7vtk1qmi/{z}/{x}/{y}@2x.png" ], 'tileSize': 256});
+			afterMap.addSource("Jovin_Paris_1672", {  "type": "raster", "tiles": ["https://api.mapbox.com/v4/manfredkaush.6v175puj/{z}/{x}/{y}@2x.png" ], 'tileSize': 256});
+			afterMap.addLayer({"id": "imgtiff1", "source": "PreHaussmann_1853", "type": "raster", "paint": { "raster-opacity": 0.85  } });
+			afterMap.addLayer({"id": "imgtiff2", "source": "Jovin_Paris_1672", "type": "raster", "paint": { "raster-opacity": 0.85  } });
+
+
+			init_navi();
+			init_keyboard();
+		});
+
+		// A selector or reference to HTML element
+		var container = '#comparison-container';
+		var map = new mapboxgl.Compare(beforeMap, afterMap, container, {
+		// Set this to enable comparing two maps by mouse movement:
+		// mousemove: true
+		});
+
+
+		// set the slider to 20% of the screen width
+		map.setSlider(window.innerWidth*0.20);
+
+
+		function init_navi()
+		{
+			// create navigation
+			// set up the corresponding toggle button for each layer
+			for (var i = 0; i < toggleableLayerIds.length; i++) {
+				var id = toggleableLayerIds[i];
+				var dlayername = display_layer_names[i];
+				 
+				var link = document.createElement('a');
+				link.href = '#' + id;
+
+				if (i ==start_indx) {	
+					link.className = 'active'; 
+					afterMap.setLayoutProperty(id, 'visibility', 'visible');
+					current_map_indx = i;
+				} else {
+					link.className = '';
+					afterMap.setLayoutProperty(id, 'visibility', 'none');
+				}
+				link.textContent = dlayername;
+				 
+				link.onclick = function (e) {
+					var clickedLayer = this.href.split("#")[1];
+					console.log(clickedLayer)
+					e.preventDefault();
+					e.stopPropagation();
+					toggle_map_by_indx(toggleableLayerIds.indexOf(clickedLayer))
+				};
+				 
+				var layers = document.getElementById('menu');
+				layers.appendChild(link);
+			}
+		}
+
+		function toggle_map_by_indx(indx){
+			map_name = toggleableLayerIds[indx]
+			console.log(map_name)
+			console.log(indx)
+			var visibility = afterMap.getLayoutProperty(map_name, 'visibility'); 
+			var layers = document.getElementById('menu');
+			if (visibility === 'none') {
+				// deactivate all other
+				for (ci =0; ci< layers.childElementCount; ci++) {layers.children[ci].className=''}
+				for (li =0; li< toggleableLayerIds.length; li++) {afterMap.setLayoutProperty(toggleableLayerIds[li], 'visibility', 'none');}	
+				// activate itself
+				layers.children[indx].className = 'active';
+				afterMap.setLayoutProperty(map_name, 'visibility', 'visible');
+				current_map_indx = indx;
+			} else {
+				afterMap.setLayoutProperty(map_name, 'visibility', 'none');
+				layers.children[indx].className = '';
+				current_map_indx = indx;
+			}
+		}
+
+
+		function init_keyboard(){
+
+			console.log("ininted")
+			document.addEventListener("keydown", keyDownTextField, false);
+
+			function keyDownTextField(e) {
+			//console.log("key pressed: " + e.keyCode)
+			//console.log(current_map_indx)
+			var keyCode = e.keyCode;
+			  if(keyCode==32) {
+			    //console.log("hit space")
+			  	toggle_map_by_indx(current_map_indx)
+			  } 
+
+			  if (keyCode == 37 || keyCode == 38) 
+			  {
+			  	current_map_indx = current_map_indx-1;
+			  	if (current_map_indx < 0) {current_map_indx = toggleableLayerIds.length -1}
+			  	toggle_map_by_indx(current_map_indx)
+			  }
+
+			  if (keyCode == 39 || keyCode == 40) 
+			  {
+			  	current_map_indx = current_map_indx+1;
+			  	if (current_map_indx >= toggleableLayerIds.length) {current_map_indx =  0}
+			  	toggle_map_by_indx(current_map_indx)
+			  }
+			}
+		}
+
+
+</script>
+<style type="text/css">
+		#menu { background: #fff; position: absolute; z-index: 100; top: 10px; right: 10px; border-radius: 3px; width: 20%; min-width: 120px;  border: 1px solid rgba(0, 0, 0, 0.4); font-family: 'Open Sans', sans-serif; }   
+		#menu a { font-size: 13px; color: #404040; display: block; margin: 0; padding: 0; padding: 10px; text-decoration: none; border-bottom: 1px solid rgba(0, 0, 0, 0.25); text-align: center; }   
+		#menu a:last-child { border: none; }   
+		#menu a:hover { background-color: #f8f8f8; color: #404040; }   
+		#menu a.active { background-color: #3887be; color: #ffffff; }   
+		#menu a.active:hover { background: #3074a4; }
+
+		.mapboxgl-compare .compare-swiper-vertical { width: 30px !important; height: 30px !important; top: 80%; left: -15px; background-size: 100%;		};
+</style>
+
+</body>
+</html>
+
+
+<!----
+https://docs.mapbox.com/mapbox-gl-js/example/mapbox-gl-compare/
+https://docs.mapbox.com/mapbox-gl-js/example/simple-map/
+https://account.mapbox.com/access-tokens/
+
+
+
+	map.addSource("myImageSource", {  "type": "image", "url": "1853 prehaussmann_modifiziert.tif", 
+  "coordinates": [[-80.425, 46.437], [-71.516, 46.437], [-71.516, 37.936], [-80.425, 37.936]] });
+
+
+manfredkaush.7vtk1qmi
+https://studio.mapbox.com/tilesets/manfredkaush.7vtk1qmi/
+
+
+https://docs.mapbox.com/mapbox-gl-js/example/vector-source/
+https://docs.mapbox.com/mapbox-gl-js/example/image-on-a-map/
+https://docs.mapbox.com/mapbox-gl-js/example/map-tiles/
+https://stackoverflow.com/questions/40127991/upload-tiff-to-mapbox-gl-js-or-mapbox-js
+https://gis.stackexchange.com/questions/53617/how-to-find-lat-lon-values-for-every-pixel-in-a-geotiff-file
+https://sandbox.idre.ucla.edu/sandbox/tutorials/installing-gdal-for-windows
+
+http://bl.ocks.org/danswick/a4de5c170c04fdd38bb4
+
+https://openmaptiles.org/docs/website/mapbox-gl-js/
+https://openmaptiles.org/styles/
+https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript
+https://docs.mapbox.com/mapbox-gl-js/example/setstyle/
+
+--->

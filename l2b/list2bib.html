@@ -3,9 +3,9 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Javascript csv2bib</title>
-	 <script src="jquery-3.5.1.min.js"></script>
+	 <script src="res/jquery-3.5.1.min.js"></script>
 
-	  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	  <link rel="stylesheet" href="res/bootstrap.4.3.1.min.css" >
 
 	  
 
@@ -311,10 +311,10 @@ queryString = window.location.search;
 console.log(queryString);
 urlParams = new URLSearchParams(queryString);
 
-code = urlParams.get('code');	
+mendeley_code = urlParams.get('code');	
 // if nothing is delivered yet, redirect the usr to login
-if (code == null) {
-	mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9513&redirect_uri=http:%2F%2Fcitavy.de&response_type=code&scope=all&state=' + Math.random()*10**13
+if (mendeley_code == null) {
+	mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9578&redirect_uri=https:%2F%2Frscgh.github.io/t2b/text2bib.html&response_type=code&scope=all&state=' + Math.random()*10**13
 	login_auth_msg = '<p>Hi, welcome to this webpage, please visit <a id="link_to_mendeley" href="'+ mend_url + '">mendeley</a> and log into your account. This is required to use their API. afterwards you will be redirected here again, and an authorization code will be passed along.</p>'
 
 	$('div.container').first().prepend(login_auth_msg);
@@ -325,12 +325,12 @@ else
 $.ajax({
   type: "POST",
   url: "https://api.mendeley.com/oauth/token",
-  data: {'grant_type': 'authorization_code', 'code': 'nAyRGMP2WTKSjgMRtnPeTKGLkHE' ,'redirect_uri': 'http://citavy.de'},
+  data: {'grant_type': 'authorization_code', 'code': mendeley_code ,'redirect_uri': 'https://rscgh.github.io/t2b/text2bib.html'},
   success: function(data) { 
   	token = data['access_token'];
   	document.getElementById("token").value = token;
   },
-  error: function(data){ document.getElementById("token").value = "Error " + data; console.log(data) },
+  error: function(data){ document.getElementById("token").value = "Error " + data['error_description']; console.log(data) },
   beforeSend : function(xhr) {
   	xhr.setRequestHeader ("Authorization", "Basic " + btoa("9578:u49WPtus5JKh2cq6")); // old: "9513:xFE0kqs5Z21k5vqd"
   	xhr.setRequestHeader ("Content-Type", "application/x-www-form-urlencoded");

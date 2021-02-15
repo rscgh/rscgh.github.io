@@ -3,10 +3,12 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Javascript csv2bib</title>
-	 <script src="res/jquery-3.5.1.min.js"></script>
 
 	  <link rel="stylesheet" href="res/bootstrap.4.3.1.min.css" >
 
+	  <script src="res/jquery-3.5.1.min.js"></script>
+	  <script src="res/bootstrap.min.js"></script>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 	  
 
 	 <style type="text/css">
@@ -314,7 +316,7 @@ urlParams = new URLSearchParams(queryString);
 mendeley_code = urlParams.get('code');	
 // if nothing is delivered yet, redirect the usr to login
 if (mendeley_code == null) {
-	mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9578&redirect_uri=https:%2F%2Frscgh.github.io/t2b/text2bib.html&response_type=code&scope=all&state=' + Math.random()*10**13
+	mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9578&redirect_uri=https:%2F%2Frscgh.github.io/l2b/text2bib.html&response_type=code&scope=all&state=' + Math.random()*10**13
 	login_auth_msg = '<p>Hi, welcome to this webpage, please visit <a id="link_to_mendeley" href="'+ mend_url + '">mendeley</a> and log into your account. This is required to use their API. afterwards you will be redirected here again, and an authorization code will be passed along.</p>'
 
 	$('div.container').first().prepend(login_auth_msg);
@@ -325,7 +327,7 @@ else
 $.ajax({
   type: "POST",
   url: "https://api.mendeley.com/oauth/token",
-  data: {'grant_type': 'authorization_code', 'code': mendeley_code ,'redirect_uri': 'https://rscgh.github.io/t2b/text2bib.html'},
+  data: {'grant_type': 'authorization_code', 'code': mendeley_code ,'redirect_uri': 'https://rscgh.github.io/l2b/text2bib.html'},
   success: function(data) { 
   	token = data['access_token'];
   	document.getElementById("token").value = token;
@@ -478,9 +480,8 @@ http://api.crossref.org/works/10.5555/12345678/transform/application/x-bibtex
 </code></pre>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
 
 
 

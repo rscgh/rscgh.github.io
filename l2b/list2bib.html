@@ -329,6 +329,10 @@ queryString = window.location.search;
 console.log(queryString);
 urlParams = new URLSearchParams(queryString);
 
+ptoken = urlParams.get('token')
+if (ptoken!="") {token = ptoken; document.getElementById("token").value = token;}
+
+
 mendeley_code = urlParams.get('code');	
 // if nothing is delivered yet, redirect the usr to login
 if (mendeley_code == null) {
@@ -347,7 +351,7 @@ $.ajax({
   success: function(data) { 
   	token = data['access_token'];
   	document.getElementById("token").value = token;
-  	window.location.search = "";	// make it empty so we dont get an error upon refresh
+  	window.location.search = "?token=" + token;	// make it empty so we dont get an error upon refresh
   },
   error: function(data){ document.getElementById("token").value = "Error " + data['error_description']; console.log(data) },
   beforeSend : function(xhr) {

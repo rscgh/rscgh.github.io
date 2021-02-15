@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Javascript csv2bib</title>
+	 <script src="jquery-3.5.1.min.js"></script>
+
+	  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	  
+
+	 <style type="text/css">
+
+		.just-padding {
+		    padding: 15px;
+		}
+
+		.list-group.list-group-root {
+		    padding: 0;
+		    overflow: hidden;
+		}
+
+		.list-group.list-group-root .list-group {
+		    margin-bottom: 0;
+		}
+
+		.list-group.list-group-root .list-group-item {
+		    border-radius: 0;
+		    border-width: 1px 0 0 0;
+		}
+
+		.list-group.list-group-root > .list-group-item:first-child {
+		    border-top-width: 0;
+		}
+
+		.list-group.list-group-root > .list-group > .list-group-item {
+		    padding-left: 30px;
+		}
+
+		.list-group.list-group-root > .list-group > .list-group > .list-group-item {
+		    padding-left: 45px;
+		}
+
+		.list-group-item .glyphicon {
+		    margin-right: 5px;
+		}
+
+
+		.list-group-item.iselected {background: #FAF4DE}
+		.mainpaper {background: #EEE}
+
+		.submbutton {
+		  background: transparent;
+		  border-radius: 10px;
+		  will-change: transform;
+		  transition: all .2s ease;
+		  border: 2px solid #FF5126;
+		  cursor: pointer;
+		  color: #ffffff;
+		  font-size: 16px;
+		  color: #FF5126;
+		  outline: none;
+		  text-align: center;
+		  }
+		  
+		  .submbutton:hover {
+		    background: #FF5126;
+		    color: #ffffff;
+		  }
+		  .submbutton:active {
+		    font-size: 15px;
+		    transform: translateY(1px);
+		  }
+		  .submbutton.active {
+		    font-size: 0;
+		    border-radius: 25px;
+		    width: 50px;
+		    background: transparent;
+		  }
+		  .submbutton.loader {
+		    border-right: 2px solid #ffffff;
+		    animation: loader .4s linear infinite;
+		  }
+		  .submbutton.success {
+		    background: #3BB873;
+		    border-color: #3BB873;
+		    font-size: 14px;
+		    color: #ffffff;
+		  }
+		}
+	 </style>
+</head>
+<body>
+
+
+<div class="container">
+
+	<br/><br/>
+	<p>Hello, lets do something.</p>
+
+	<div class="form-group">
+	  <label for="token">The token, see below:</label>
+	  <textarea class="form-control" rows="2" id="token"></textarea>	
+	  <label for="comment">One line per paper information:</label>
+	  <textarea class="form-control" rows="5" id="comment"></textarea>
+	</div>
+
+	<button type="button" class="btn btn-secondary btn-lg btn-block">Try to extract it</button>
+
+	<button class="submbutton">Dadada</button>
+</div>
+
+<div class="container">
+
+<div class="just-padding">
+
+<p>Here is the list of papers: </p>
+
+<div id="superlist" class="list-group list-group-root well">
+ 
+</div>
+</div>
+
+<p>Now <a href="#make_bib" id="make_bib_btn"> make me bibtex </a>.</p>
+Also add buttion to say refine query later / refine query right now and do this single one again<br/>
+list also items that didnt show up <br/>
+Also add a non option <br/>
+make the submit button better <br/>
+check if response is empty, and collect original query...<br/><br/>
+
+<p>Now <a href="#make_bib" id="bib_download" > Download it </a>.</p>
+
+
+<div class="overflow-auto" style="max-height:300px;"><pre id="bibfile">...</pre></div>
+
+
+</div>
+
+
+
+<div id="template_paper" style="display: none;">
+<a href="#paper-items-%pid%" id="paper%pid%" data-toggle="collapse" class="list-group-item list-group-item-action mainpaper" aria-current="true">
+	<small class="mb-1" style="color:darkred;">%original_req%</small>
+    <div class="d-flex w-100 justify-content-between">
+      <p class="mb-1">%title%</p>
+      <small>%year%</small>
+    </div>
+    <small class="authorsmall">%authors_str%</small>
+  </a>
+  <div class="list-group collapse" id="paper-items-%pid%">
+  	%innerPapers%
+  </div>
+</div>
+
+<div id="template_paper_option" style="display: none;">
+	<label class="list-group-item paper-option%iselected%" itemnr="%itemnr%" target="paper%pid%">
+	    <div class="d-flex w-100 justify-content-between">
+	      <p class="mb-1">%title%</p>
+	      <small>%year%</small>
+	    </div>
+	    <small>%authors_str%</small>
+	</label>
+</div>
+
+
+
+
+
+<script type="text/javascript"> 
+
+//////////////////////////////////////////////////////////////////////////
+// Main variables that keep track of the paper query answers and selected paper options thereof
+
+
+all_resp=[]
+selected_paper = []
+
+
+ singleresp = [ { "title": "The social hippocampus", "type": "generic", "authors": [ { "first_name": "Alison", "last_name": "Montagrin", "scopus_author_id": "55840141800" }, { "first_name": "Catarina", "last_name": "Saiote", "scopus_author_id": "55627653900" }, { "first_name": "Daniela", "last_name": "Schiller", "scopus_author_id": "7006486626" } ], "year": 2018, "source": "Hippocampus", "identifiers": { "sgr": "85028911299", "issn": "10981063", "pui": "618217629", "scopus": "2-s2.0-85028911299", "pmid": "28843041", "doi": "10.1002/hipo.22797" }, "keywords": [ "affiliation", "cognitive map", "hierarchy", "hippocampus", "navigation", "relational", "social" ], "id": "23947e8e-22fa-3ada-abc4-b820c71d797f", "link": "https://www.mendeley.com/catalogue/23947e8e-22fa-3ada-abc4-b820c71d797f/" }, { "title": "The Hippocampus Encodes Distances in Multidimensional Feature Space", "type": "journal", "authors": [ { "first_name": "Stephanie", "last_name": "Theves", "scopus_author_id": "56563087100" }, { "first_name": "Guillén", "last_name": "Fernandez", "scopus_author_id": "7202232893" }, { "first_name": "Christian F.", "last_name": "Doeller", "scopus_author_id": "6507122603" } ], "year": 2019, "source": "Current Biology", "identifiers": { "sgr": "85063408900", "issn": "09609822", "pui": "2001738932", "pii": "S0960982219302052", "scopus": "2-s2.0-85063408900", "pmid": "30905602", "doi": "10.1016/j.cub.2019.02.035" }, "keywords": [ "cognitive geometry", "cognitive map", "conceptual knowledge", "spatial coding" ], "id": "7b89d43c-b1ff-379c-b6ba-a489e6f57c85", "link": "https://www.mendeley.com/catalogue/7b89d43c-b1ff-379c-b6ba-a489e6f57c85/" }, { "title": "Vascular basement membranes as pathways for the passage of fluid into and out of the brain", "type": "journal", "authors": [ { "first_name": "Alan W.J.", "last_name": "Morris", "scopus_author_id": "56364553200" }, { "first_name": "Matthew Mac Gregor", "last_name": "Sharp", "scopus_author_id": "55597988100" }, { "first_name": "Nazira J.", "last_name": "Albargothy", "scopus_author_id": "57184247900" }, { "first_name": "Rute", "last_name": "Fernandes", "scopus_author_id": "36604362100" }, { "first_name": "Cheryl A.", "last_name": "Hawkes", "scopus_author_id": "12242641800" }, { "first_name": "Ajay", "last_name": "Verma", "scopus_author_id": "55948558700" }, { "first_name": "Roy O.", "last_name": "Weller", "scopus_author_id": "7201400620" }, { "first_name": "Roxana O.", "last_name": "Carare", "scopus_author_id": "23767970500" } ], "year": 2016, "source": "Acta Neuropathologica", "identifiers": { "sgr": "84961167095", "issn": "14320533", "pui": "609108512", "pii": "1555", "scopus": "2-s2.0-84961167095", "pmid": "26975356", "doi": "10.1007/s00401-016-1555-z" }, "keywords": [ "Alzheimer’s disease", "Amyloid-β", "Arteries", "Basement membranes", "Capillaries", "Drug delivery", "Lymphatic drainage", "Nanoparticles neuroimmunology", "Virchow–Robin space" ], "id": "7301bcbb-ed86-3b51-b916-5fb4bdbb3c25", "link": "https://www.mendeley.com/catalogue/7301bcbb-ed86-3b51-b916-5fb4bdbb3c25/" } ]
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// Some general functions
+
+
+/////////////
+// i.e. function for the usage of html templates
+//https://stackoverflow.com/questions/377961/efficient-javascript-string-replacement/378001
+function repltemplate( templateid, data ){
+    return document.getElementById( templateid ).innerHTML
+      .replace(
+        /%(\w*)%/g, // or /{(\w*)}/g for "{this} instead of %this%"
+        function( m, key ){
+          return data.hasOwnProperty( key ) ? data[ key ] : "";
+})};
+
+
+
+
+/////////////
+// update the currently selected paper 
+
+
+update_paper = function(pid, elementn){
+
+	//singleresp = allresp[pid];
+	console.log("update " + pid +"-" + elementn)
+
+	paper = all_resp[pid][elementn]
+    authors_str=make_auth_str(paper.authors)
+
+	title_str = paper.title //+ " <b>" + paper.year +"</b>"
+	$('#paper'+pid +' > small.authorsmall').html(authors_str);
+	$('#paper'+pid +' > div > p').html(title_str);
+
+	selected_paper[pid] = elementn;
+}
+
+
+/////////////
+// update the currently selected paper 
+
+make_auth_str = function(authors){
+	authors_str="";
+	for (var i = 0; i < Math.min(authors.length-1,5); i++) 
+	{
+	    authors_str = authors_str + authors[i].first_name + "<b> " + authors[i].last_name +  "</b>; "
+	}
+
+	if (authors.length-1>5) {authors_str = authors_str + " [...]; "	}
+	if (paper.authors.length-1 >= 0)
+	{
+	  authors_str = authors_str + authors[i].first_name + " <b>" + authors[i].last_name +  "</b>"
+	}
+	return authors_str;
+}
+
+
+
+
+
+/////////////
+// load and append the papers of a response
+
+
+load_from_resp = function(respones, orig_queries){ 
+  prevnr = all_resp.length;
+  all_resp = all_resp.concat(respones);
+  selected_paper = selected_paper.concat(new Array(respones.length).fill(0));
+
+  allcont="";
+  //resp=[singleresp, singleresp]
+  
+  /////  check if response is empty, and collect original query...
+
+  for (var pid = 0; pid < respones.length; pid++) 
+  {	
+  	realpid = prevnr+pid;
+  	if (respones[pid].length<=0) {continue;}
+  	innerPapers="";
+  	for (var j = 0; j < respones[pid].length; j++) {
+  		paper = respones[pid][j]
+  		authors_str =  make_auth_str(paper.authors)
+  		iselecteds = ""; if(j==0){ iselecteds = " iselected"};
+  		xxx=repltemplate("template_paper_option", {"itemnr": j,"authors_str":authors_str, "title":paper.title, "year":paper.year, "pid": realpid , "iselected": iselecteds})
+  		innerPapers=innerPapers+xxx;
+  	}
+
+  	orq = (typeof orig_queries !== 'undefined') ? ((orig_queries.length>pid) ? orig_queries[pid] : "no request") : "no request";
+
+  	outerPaper = repltemplate("template_paper", {"innerPapers": innerPapers,"pid":realpid, "authors_str": make_auth_str(respones[pid][0].authors), "title": respones[pid][0].title, "year": respones[pid][0].year,"original_req": orq});
+  	allcont = allcont+outerPaper;
+  }
+
+  $("#superlist").append(allcont);
+
+  $(".paper-option").unbind('click');
+  $(".paper-option").on('click', function(ev) {
+  	$(this).siblings(".paper-option").removeClass("iselected");
+  	$(this).addClass("iselected");
+  	itmnr = $(this).attr("itemnr");
+  	ev.preventDefault();
+  	ev.stopImmediatePropagation();
+	tid=$(this).attr("target").substring(5)
+	console.log(tid)
+	update_paper(tid,itmnr)
+	selected_paper[tid] = itmnr;
+	console.log(selected_paper);
+	//$("#paper"+tid).addClass("collapse");
+	//$("#paper"+tid).attr("aria-expanded", "false");
+	//$("#paper"+tid).collapse();
+	$("#paper-items-"+tid).removeClass("show");
+  });
+};
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// ONLOAD (?)
+
+$(function() { 
+
+
+//////////////////////////////////////////////////////////////////////////
+// get the token from mendeley
+
+
+
+queryString = window.location.search;
+console.log(queryString);
+urlParams = new URLSearchParams(queryString);
+
+code = urlParams.get('code');	
+// if nothing is delivered yet, redirect the usr to login
+if (code == null) {
+	mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9513&redirect_uri=http:%2F%2Fcitavy.de&response_type=code&scope=all&state=' + Math.random()*10**13
+	login_auth_msg = '<p>Hi, welcome to this webpage, please visit <a id="link_to_mendeley" href="'+ mend_url + '">mendeley</a> and log into your account. This is required to use their API. afterwards you will be redirected here again, and an authorization code will be passed along.</p>'
+
+	$('div.container').first().prepend(login_auth_msg);
+}
+else
+{
+// if we already have the code
+$.ajax({
+  type: "POST",
+  url: "https://api.mendeley.com/oauth/token",
+  data: {'grant_type': 'authorization_code', 'code': 'nAyRGMP2WTKSjgMRtnPeTKGLkHE' ,'redirect_uri': 'http://citavy.de'},
+  success: function(data) { 
+  	token = data['access_token'];
+  	document.getElementById("token").value = token;
+  },
+  error: function(data){ document.getElementById("token").value = "Error " + data; console.log(data) },
+  beforeSend : function(xhr) {
+  	xhr.setRequestHeader ("Authorization", "Basic " + btoa("9578:u49WPtus5JKh2cq6")); // old: "9513:xFE0kqs5Z21k5vqd"
+  	xhr.setRequestHeader ("Content-Type", "application/x-www-form-urlencoded");
+  },
+});
+
+// token: // 'MSwxNjEyNTcwOTg0OTU1LDYxMDgzMTI4MSw5NTEzLGFsbCwsLGI2NzYxMGQ0MjIxN2EwNGZiZTY4MTIyOGM0YzIxNWFkYTdlZGd4cnFiLDVhYTM4NGFlLTA3N2YtMzRhYi1hZDVkLTRlY2QxMmY2MjZkNyx6OTJCaFBzSjl0ZEpzTndCR2E5Qm0xT1hyLXc'
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// Search function for the mendeley catalog
+
+catalogsearch = function(squery, token, succfunc) {
+	curl = "https://api.mendeley.com/search/catalog?query=" + encodeURI(squery) + "&limit=5"
+	$.ajax({ url: curl,
+        beforeSend: function(xhr) { 
+        	xhr.setRequestHeader("Authorization", "Bearer "+token);
+        	xhr.setRequestHeader("Accept", "application/vnd.mendeley-document.1+json");
+        }, 
+        "squery" : squery,
+        success: function(resp, status, xhr){console.log("Query: " + this.squery); console.log(resp); load_from_resp([resp], [this.squery]); }
+	})
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// add the submit button functionality
+
+$('button.submbutton').on('click', function() {
+    var tis = $(this);
+    if(tis.hasClass('active') || tis.hasClass('success')) {
+      return false;
+    }
+    paperstext = document.getElementById("comment").value;
+    token = document.getElementById("token").value;
+    paperlines = paperstext.split(/\r?\n/)
+
+    console.log(paperlines)
+
+    for (var pn = 0; pn < paperlines.length; pn++) 
+    {	
+    	//console.log("Dada" + paperlines[pn])
+    	if ($.trim(paperlines[pn])=="") {continue;}
+    	setTimeout(function(xx){
+    		console.log("Search: " + paperlines[xx])
+    		catalogsearch(paperlines[xx], token, 0)
+    	}, 200, pn);
+    }
+    
+
+    tis.addClass('active');
+    setTimeout(function(){ tis.addClass('loader'); }, 125);
+    setTimeout(function(){
+      tis.removeClass('loader active');
+      tis.text('Success');
+      tis.addClass('success animated pulse');
+    }, 1600);
+
+  });
+
+});
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// postprocessing of the selection for the selection of the bibtex file
+
+bibtexfile="";
+$('#make_bib_btn').on('click', function() {
+	console.log("do accumulation")
+	accumulateBibtex();
+});
+//
+
+accumulateBibtex = function(){
+bibtexfile="";
+for (var pn = 0; pn < all_resp.length; pn++) 
+{
+	paper = all_resp[pn][selected_paper[pn]];
+	console.log(paper)
+	doi = paper.identifiers.doi//'10.1073/pnas.1815129116'
+	console.log(doi)
+	curl = 'http://api.crossref.org/works/'+doi+'/transform/application/x-bibtex'
+	$.ajax({ url: curl,
+	    beforeSend: function(xhr) { 
+	    	xhr.setRequestHeader("Accept", "application/x-bibtex");
+	    }, 
+	    success: function(resp, status, xhr)
+	    {
+	    	console.log(resp);bibtexfile = bibtexfile + "\n"+ resp; 
+	    	$('#bib_download').attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(bibtexfile))
+			$('#bib_download').attr('download', "new_lib.bib");
+			$('#bibfile').html(bibtexfile);
+		}
+	})
+}
+} // end accumulateBibtex function
+
+
+</script>
+
+
+
+<br/><br/>
+make the following container collapseable:
+
+<div class="container">
+
+Get the key:
+
+<pre><code>
+
+https://api.mendeley.com/oauth/authorize?client_id=9513&redirect_uri=http:%2F%2Fcitavy.de&response_type=code&scope=all&state=21365353332730.97845
+
+=> http://citavy.de/?code=8ekzFqxwdQV5btz4g00W5aSb4S4&state=213653957730.97845
+
+
+succfunc1 = function(data){
+  console.log("received data")
+  console.log(data);
+  console.log(data['access_token'])
+}
+
+$.ajax({
+  type: "POST",
+  url: "https://api.mendeley.com/oauth/token",
+  data: {'grant_type': 'authorization_code', 'code': 'nAyRGMP2WTKSjgMRtnPeTKGLkHE' ,'redirect_uri': 'http://citavy.de'},
+  success: succfunc1,
+  beforeSend : function(xhr) { 
+  	xhr.setRequestHeader ("Authorization", "Basic " + btoa("9513:xFE0kqs5Z21k5vqd"));
+  	xhr.setRequestHeader ("Content-Type", "application/x-www-form-urlencoded");
+  },
+});
+
+=> gives you the access_token i.e. 'MSwxNjEyNTcwOTg0OTU1LDYxMDgzMTI4MSw5NTEzLGFsbCwsLGI2NzYxMGQ0MjIxN2EwNGZiZTY4MTIyOGM0YzIxNWFkYTdlZGd4cnFiLDVhYTM4NGFlLTA3N2YtMzRhYi1hZDVkLTRlY2QxMmY2MjZkNyx6OTJCaFBzSjl0ZEpzTndCR2E5Qm0xT1hyLXc'
+
+
+http://api.crossref.org/works/10.5555/12345678/transform/application/x-bibtex
+
+
+</code></pre>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
+
+</body>
+
+
+</html>
+

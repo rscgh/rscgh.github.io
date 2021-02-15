@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Javascript csv2bib</title>
+	 <script src="jquery-3.5.1.min.js"></script>
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+  <p>Hi, welcome to this webpage, please visit <a id="link_to_mendeley" href="#mendely">mendeley</a> and log into your account. This is required to use their API. This will then redirect you to the <a href="list2bib.html">actual interface of list2bib</a> and pass along an authorization code.
+
+</div>
+
+url = 'https://api.mendeley.com/oauth/authorize?client_id=9513&redirect_uri=http:%2F%2Fcitavy.de&response_type=code&scope=all&state=' + Math.random()*10**13
+
+
+https://api.mendeley.com/oauth/authorize?client_id=9513&redirect_uri=http:%2F%2Fcitavy.de&response_type=code&scope=all&state=21365353332730.97845
+
+https://api.mendeley.com/oauth/authorize?client_id=9513&redirect_uri=http:%2F%2Fcitavy.de&response_type=code&scope=all&state=4056900377676.3657
+
+
+Math.random()*10**13
+
+
+21365353332730.97845
+4056900377676.3657
+
+<script type="text/javascript"> 
+
+mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9513&redirect_uri=http:%2F%2Fcitavy.de&response_type=code&scope=all&state=' + Math.random()*10**13
+
+$("#link_to_mendeley").attr("href", mend_url)
+
+</script>
+
+</body>
+
+
+</html>
+

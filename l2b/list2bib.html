@@ -435,7 +435,7 @@ for (var pn = 0; pn < all_resp.length; pn++)
 	console.log(paper)
 	doi = paper.identifiers.doi//'10.1073/pnas.1815129116'
 	console.log(doi)
-	curl = 'http://api.crossref.org/works/'+doi+'/transform/application/x-bibtex'
+	curl = 'https://api.crossref.org/works/'+doi+'/transform/application/x-bibtex'
 	$.ajax({ url: curl,
 	    beforeSend: function(xhr) { 
 	    	xhr.setRequestHeader("Accept", "application/x-bibtex");

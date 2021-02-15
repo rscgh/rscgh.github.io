@@ -303,7 +303,7 @@ if (mendeley_code == null && ptoken==null) {
 
 	$('div.container').first().prepend(login_auth_msg);
 }
-else
+else if (ptoken==null)
 {
 // if we already have the code
 $.ajax({

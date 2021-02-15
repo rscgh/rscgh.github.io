@@ -319,7 +319,7 @@ urlParams = new URLSearchParams(queryString);
 mendeley_code = urlParams.get('code');	
 // if nothing is delivered yet, redirect the usr to login
 if (mendeley_code == null) {
-	mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9578&redirect_uri=https:%2F%2Frscgh.github.io/l2b/text2bib.html&response_type=code&scope=all&state=' + Math.random()*10**13
+	mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9578&redirect_uri=https:%2F%2Frscgh.github.io/l2b/list2bib.html&response_type=code&scope=all&state=' + Math.random()*10**13
 	login_auth_msg = '<p>Hi, welcome to this webpage, please visit <a id="link_to_mendeley" href="'+ mend_url + '">mendeley</a> and log into your account. This is required to use their API. afterwards you will be redirected here again, and an authorization code will be passed along.</p>'
 
 	$('div.container').first().prepend(login_auth_msg);
@@ -330,7 +330,7 @@ else
 $.ajax({
   type: "POST",
   url: "https://api.mendeley.com/oauth/token",
-  data: {'grant_type': 'authorization_code', 'code': mendeley_code ,'redirect_uri': 'https://rscgh.github.io/l2b/text2bib.html'},
+  data: {'grant_type': 'authorization_code', 'code': mendeley_code ,'redirect_uri': 'https://rscgh.github.io/l2b/list2bib.html'},
   success: function(data) { 
   	token = data['access_token'];
   	document.getElementById("token").value = token;

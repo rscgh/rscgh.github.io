@@ -67,45 +67,7 @@
 		.list-group-item.iselected {background: #FAF4DE}
 		.mainpaper {background: #EEE}
 
-		.submbutton {
-		  background: transparent;
-		  border-radius: 10px;
-		  will-change: transform;
-		  transition: all .2s ease;
-		  border: 2px solid #FF5126;
-		  cursor: pointer;
-		  color: #ffffff;
-		  font-size: 16px;
-		  color: #FF5126;
-		  outline: none;
-		  text-align: center;
-		  }
-		  
-		  .submbutton:hover {
-		    background: #FF5126;
-		    color: #ffffff;
-		  }
-		  .submbutton:active {
-		    font-size: 15px;
-		    transform: translateY(1px);
-		  }
-		  .submbutton.active {
-		    font-size: 0;
-		    border-radius: 25px;
-		    width: 50px;
-		    background: transparent;
-		  }
-		  .submbutton.loader {
-		    border-right: 2px solid #ffffff;
-		    animation: loader .4s linear infinite;
-		  }
-		  .submbutton.success {
-		    background: #3BB873;
-		    border-color: #3BB873;
-		    font-size: 14px;
-		    color: #ffffff;
-		  }
-		}
+		
 	 </style>
 </head>
 <body>
@@ -123,9 +85,9 @@
 	  <textarea class="form-control" rows="5" id="comment"></textarea>
 	</div>
 
-	<button type="button" class="btn btn-secondary btn-lg btn-block">Try to extract it</button>
+	<button type="button" class="querybutton btn btn-secondary btn-lg btn-block">Try to extract it</button>
 
-	<button class="submbutton">Dadada</button>
+	<!--<button class="submbutton">Dadada</button>-->
 </div>
 
 <div class="container">
@@ -386,16 +348,14 @@ catalogsearch = function(squery, token, succfunc) {
 //////////////////////////////////////////////////////////////////////////
 // add the submit button functionality
 
-$('button.submbutton').on('click', function() {
+$('button.querybutton').on('click', function() {
     var tis = $(this);
-    if(tis.hasClass('active') || tis.hasClass('success')) {
-      return false;
-    }
+    //if(tis.hasClass('active') || tis.hasClass('success')) {  return false;}
     paperstext = document.getElementById("comment").value;
     token = document.getElementById("token").value;
     paperlines = paperstext.split(/\r?\n/)
 
-    console.log(paperlines)
+    //console.log(paperlines)
 
     for (var pn = 0; pn < paperlines.length; pn++) 
     {	
@@ -404,17 +364,9 @@ $('button.submbutton').on('click', function() {
     	setTimeout(function(xx){
     		console.log("Search: " + paperlines[xx])
     		catalogsearch(paperlines[xx], token, 0)
-    	}, 200, pn);
+    	}, 100 +(pn*10), pn);
+    	//}, 200, pn);
     }
-    
-
-    tis.addClass('active');
-    setTimeout(function(){ tis.addClass('loader'); }, 125);
-    setTimeout(function(){
-      tis.removeClass('loader active');
-      tis.text('Success');
-      tis.addClass('success animated pulse');
-    }, 1600);
 
   });
 

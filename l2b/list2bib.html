@@ -388,7 +388,9 @@ accumulateBibtex = function(){
 bibtexfile="";
 for (var pn = 0; pn < all_resp.length; pn++) 
 {
+	if (all_resp[pn].length == 0){ continue;}
 	paper = all_resp[pn][selected_paper[pn]];
+	console.log(all_resp[pn].length)
 	console.log(paper)
 	doi = paper.identifiers.doi//'10.1073/pnas.1815129116'
 	console.log(doi)

@@ -71,6 +71,8 @@
       </div>
     </div>
 
+    
+
     <div class="container">
        <div class="container is-clearfix" style="margin-bottom: 1rem;">
           <b-field label="Full Url to the Bucket (default is OpenNeuro):">
@@ -78,6 +80,13 @@
           </b-field>
         </div>
     </div>
+
+    <div class="container">
+       <p>{{pathPrefix}}</p>
+       <h2>s3://{{config.bucketUrl.split("/").slice(config.bucketUrl.split("/").length-1)[0]}}/{{pathPrefix}}</h2>
+       <p>.</p>
+    </div>
+    
 
     <div class="container">
       <!-- Navigation Bar -->

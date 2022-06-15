@@ -7,12 +7,13 @@
   <script>
     const config = {
       title: 'Bucket Browser',
-      subtitle: 'made with ♥ by qoomon',
-      logo: 'https://qoomon.github.io/aws-s3-bucket-browser/logo.png',
-      favicon: 'https://qoomon.github.io/aws-s3-bucket-browser/favicon.ico',
+      subtitle: 'Originally made with ♥ by qoomon, adapted to OpenNeuro',
+      logo: 'logo.png',
+      favicon: 'favicon.ico',
       primaryColor: '#167df0',
 
-      bucketUrl: undefined,
+      //bucketUrl: undefined,
+      bucketUrl: 'https://s3.us-east-1.amazonaws.com/openneuro.org/',
       // If bucketUrl is undefined, this script tries to determine bucket Rest API URL from this file location itself.
       //   This will only work for locations like these
       //   * https://s3.BUCKET-REGION.amazonaws.com/BUCKET-NAME/index.html
@@ -24,6 +25,7 @@
       //   * https://storage.googleapis.com/BUCKET-NAME
       //   The URL should return an XML document with <ListBucketResult> as root element.
       rootPrefix: undefined, // e.g. 'subfolder/'
+      //rootPrefix: 'ds002790', // e.g. 'subfolder/'
       keyExcludePatterns: [/^index\.html$/],
       pageSize: 50,
 
@@ -69,6 +71,14 @@
     </div>
 
     <div class="container">
+       <div class="container is-clearfix" style="margin-bottom: 1rem;">
+          <b-field label="Full Url to the Bucket (default is OpenNeuro):">
+            <b-input value="dada" v-model="customthing" @keyup.enter.native="searchByPrefix"></b-input>
+          </b-field>
+        </div>
+    </div>
+
+    <div class="container">
       <!-- Navigation Bar -->
       <div class="container is-clearfix" style="margin-bottom: 1rem;">
         <!-- Prefix Breadcrumps -->
@@ -104,6 +114,7 @@
                 </b-input>
             </b-field>
 
+
             <!-- Paginating Buttons -->
             <div class="container" v-show="nextContinuationToken || previousContinuationTokens.length > 0"
               style="display: contents;">
@@ -124,8 +135,13 @@
                 >
               </b-button>
             </div>
+
+
+
           </div>
         </div>
+
+
 
 
       </div>
@@ -299,6 +315,12 @@
       config.bucketUrl = window.location.href
     }
 
+    /////////////////////////////////////
+    // add stuff here
+    /////////////////////////////////////
+
+
+
     // try adjusting bucket url to bucket rest api endpoint
     let match
     let type
@@ -362,8 +384,9 @@
       el: '#app',
       data: {
         config, // defined in <head> section
-        pathPrefix: '',
-        searchPrefix: '',
+        pathPrefix: '',//'',
+        searchPrefix: 'ds002790',
+        customthing: config.bucketUrl,
         pathContentTableData: [],
 
         previousContinuationTokens: [],
@@ -415,6 +438,7 @@
           if(this.validBucketPrefix(this.searchPrefix)){
               const pathPrefixDir = this.pathPrefix.replace(/[^/]*$/, '')
               this.pathPrefix = pathPrefixDir + this.searchPrefix
+              console.log(this.customthing)
           }
         },
         previousPage() {

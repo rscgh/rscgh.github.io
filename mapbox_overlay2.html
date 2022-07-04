@@ -53,8 +53,8 @@
 
 		mapboxgl.accessToken = 'pk.eyJ1IjoibWFuZnJlZGthdXNoIiwiYSI6Im8yLWJITmMifQ.QZY-vZGYNs955DKglRYt8g';
 
-		var toggleableLayerIds = ['imgtiff2', 'imgtiff1'];
-		var display_layer_names = ['1672 - Jovin Paris Map', '1853 - PreHaussmanian Paris'];
+		var toggleableLayerIds = ['imgtiff2', 'imgtiff1', 'imgtiff3_realUrb'];
+		var display_layer_names = ['1672 - Jovin Paris Map', '1853 - PreHaussmanian Paris', '1852-1927 Realistations Urbaines - Second Empire and 3rd Republic'];
 		var start_indx = 0;
 		var current_map_indx = -1;
 
@@ -75,8 +75,14 @@
 		});
 
 		afterMap.on('load', function () {
+			afterMap.addSource("real_urb_2emp3rep", {  "type": "raster", "tiles": ["https://api.mapbox.com/v4/manfredkaush.8zh1bvf0/{z}/{x}/{y}@2x.png" ], 'tileSize': 256});
+
 			afterMap.addSource("PreHaussmann_1853", {  "type": "raster", "tiles": ["https://api.mapbox.com/v4/manfredkaush.7vtk1qmi/{z}/{x}/{y}@2x.png" ], 'tileSize': 256});
 			afterMap.addSource("Jovin_Paris_1672", {  "type": "raster", "tiles": ["https://api.mapbox.com/v4/manfredkaush.6v175puj/{z}/{x}/{y}@2x.png" ], 'tileSize': 256});
+
+
+			afterMap.addLayer({"id": "imgtiff3_realUrb", "source": "real_urb_2emp3rep", "type": "raster", "paint": { "raster-opacity": 0.85  } });
+
 			afterMap.addLayer({"id": "imgtiff1", "source": "PreHaussmann_1853", "type": "raster", "paint": { "raster-opacity": 0.85  } });
 			afterMap.addLayer({"id": "imgtiff2", "source": "Jovin_Paris_1672", "type": "raster", "paint": { "raster-opacity": 0.85  } });
 

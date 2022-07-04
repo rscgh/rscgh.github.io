@@ -284,6 +284,9 @@
       </div>
     </div>
 
+    <div class="container">Sample Command: <br><code> aws s3 cp s3://openneuro.org/ds002790/derivatives/fmriprep/sub-0001/ . --exclude "*" --recursive --include "*.json" --no-sign-request</code></div>
+    
+
     <!-- Footer -->
     <div class="footer-bucket-url">
       <a :href="`${config.bucketUrl}?prefix=${bucketPrefix}`">Bucket: {{ config.bucketUrl }}</a>

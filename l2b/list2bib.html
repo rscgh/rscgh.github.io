@@ -88,7 +88,10 @@
 
 	<p>The mendeley API is used to query by the given paper name, authors etc. </p>
 	<p>In a second step, the returned doi's are used to get the bib-style entries from api.crossref.org </p>
+
 	<p>Do not overdo request, as I think both APIs might eventually refuse service to your IP when too many requests are received. (usually one request per paper is done. If you have many paper queries, then one button press can lead to alot of requests.) </p>
+
+	<span id="mendeley_login_placeholder"></span>
 
 	<div class="form-group">
 	  <label for="token">The token, see below:</label>
@@ -107,34 +110,35 @@
 <div class="container">
 <div class="just-padding" style="padding-left:0; padding-right: 0px;">
 
-<p>Here is the list of papers: </p>
+<p>Here is (or will be) the list of papers: </p>
 
 <div id="superlist" class="list-group list-group-root well">
  
 </div>
+<br/>
 </div>
 
 <p>
-Now <a href="#make_bib" id="make_bib_btn"> make me bibtex </a> and then 
-<a href="#down_bib" id="bib_download" > ... </a>
+After you have selected the paper, you can then query the  crossref api to
+<a href="#make_bib" id="make_bib_btn" class="btn btn-secondary"> generate bib-tex style data </a> 
+<a href="#down_bib" id="bib_download" class="btn btn-success"> and then ... </a> 
+<a href ="#bibfile" data-toggle="collapse" class="btn btn-light">or inspect it first below.<a>
 </p>
 
+<br/>
 
-
-
-
-
-<h5>Future todos:</h5	>
-
-Also add buttion to say refine query later / refine query right now and do this single one again<br/>
-make the submit button better <br/>
-check if response is empty, and collect original query...<br/><br/>
-
-
-<h5><a href ="#bibfile" data-toggle="collapse" class="btn btn-info">Toggle the Bib-file<a></h5>
-<div class="overflow-auto" style="max-height:300px;"><pre id="bibfile">...</pre></div>
+<h5></h5>
+<div class="overflow-auto" style="max-height:300px;"><pre id="bibfile" class="collapse">...</pre></div>
 
 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -400,9 +404,9 @@ $(function() {
 	// if nothing is delivered yet, redirect the usr to login
 	if (mendeley_code == null && ptoken==null) {
 		mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9578&redirect_uri=https:%2F%2Frscgh.github.io/l2b/list2bib.html&response_type=code&scope=all&state=' + Math.random()*10**13
-		login_auth_msg = '<p>Hi, welcome to this webpage, please visit <a id="link_to_mendeley" href="'+ mend_url + '">mendeley</a> and log into your account. This is required to use their API. afterwards you will be redirected here again, and an authorization code will be passed along. If you already have generated a token and just refershed this page, then no need to do this.</p>'
+		login_auth_msg = '<div class="alert alert-warning" role="alert"><h4 class="alert-heading">Mendeley Login Required</h4><p>Please <a id="link_to_mendeley" href="'+ mend_url + '">login to mendeley via this link to be allowed to use their API</a>. After login, this webpage will redirect you back here along with an API token. This is required to use their API.</p><div>'
 
-		$('div.container').first().prepend(login_auth_msg);
+		$('#mendeley_login_placeholder').prepend(login_auth_msg);
 	}
 	else if (ptoken==null)
 	{
@@ -519,8 +523,18 @@ accumulateBibtex = function()
 </script>
 
 
+
+<footer style="background: #f9f9f9;">
 <div class="container">
-<h5><a href ="#gen_mendeley_api_instr" class="btn btn-secondary" data-toggle="collapse">Get API information (click here to toggle.)</a></h5>
+<br>
+<h6>Future todos:</h6>
+
+Also add buttion to say refine query later / refine query right now and do this single one again<br/>
+make the submit button better <br/>
+check if response is empty, and collect original query...<br/><br/>
+
+
+<h5><a href ="#gen_mendeley_api_instr" class="btn btn-link" data-toggle="collapse">Get API information (click here to toggle.)</a></h5>
 
 <div id="gen_mendeley_api_instr" style="" class="collapse">
 <br/><br/>
@@ -553,8 +567,10 @@ $.ajax({
 http://api.crossref.org/works/10.5555/12345678/transform/application/x-bibtex
 
 </code></pre>
+<br/>
 </div>
 </div>
+</footer>
 
 
 

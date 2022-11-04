@@ -293,7 +293,7 @@ load_from_resp = function(respones, orig_queries){
   	if (respones[pid].length<=0) {
 
   		oreq_text = "No paper found for: '" + orq + "' (and hence excluded)."
-  		outerPaper_not_found = repltemplate("template_paper_not_found", {"innerPapers": innerPapers,"pid":realpid, "original_req": oreq_text});
+  		outerPaper_not_found = repltemplate("template_paper_not_found", {"innerPapers": "none","pid":realpid, "original_req": oreq_text});
   		allcont = allcont+outerPaper_not_found;
   		// do not do the rest of the function then
   		continue;
@@ -374,7 +374,7 @@ catalogsearch = function(squery, token, succfunc) {
 	})
 }
 
-
+// https://dev.mendeley.com/code/core_quick_start_guides.html#demo-3
 
 //////////////////////////////////////////////////////////////////////////
 // ONLOAD (?)
@@ -529,9 +529,11 @@ accumulateBibtex = function()
 <br>
 <h6>Future todos:</h6>
 
-Also add buttion to say refine query later / refine query right now and do this single one again<br/>
-make the submit button better <br/>
-check if response is empty, and collect original query...<br/><br/>
+remove empty lines automatically <br/>
+mark individual lines in the input ...<br/>
+highlight searched for terms ?<br/>
+
+add option to refine queries post-hoc on a single item basis / have dropdown suggestions<br/>
 
 
 <h5><a href ="#gen_mendeley_api_instr" class="btn btn-link" data-toggle="collapse">Get API information (click here to toggle.)</a></h5>

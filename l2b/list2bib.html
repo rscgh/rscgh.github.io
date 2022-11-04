@@ -97,14 +97,15 @@
 	  <textarea class="form-control" rows="5" id="comment"></textarea>
 	</div>
 
-	<button type="button" class="querybutton btn btn-secondary btn-lg btn-block">Try to extract it</button>
+	<button type="button" class="querybutton btn btn-primary btn-lg btn-block">Try to extract it</button>
 
 	<!--<button class="submbutton">Dadada</button>-->
 </div>
 
-<div class="container">
 
-<div class="just-padding">
+
+<div class="container">
+<div class="just-padding" style="padding-left:0; padding-right: 0px;">
 
 <p>Here is the list of papers: </p>
 
@@ -118,16 +119,20 @@ Now <a href="#make_bib" id="make_bib_btn"> make me bibtex </a> and then
 <a href="#down_bib" id="bib_download" > ... </a>
 </p>
 
+
+
+
+
+
 <h5>Future todos:</h5	>
 
-
 Also add buttion to say refine query later / refine query right now and do this single one again<br/>
-
 make the submit button better <br/>
 check if response is empty, and collect original query...<br/><br/>
 
-<div class="overflow-auto" style="max-height:300px;"><pre id="bibfile">...</pre></div>
 
+<h5><a href ="#bibfile" data-toggle="collapse" class="btn btn-info">Toggle the Bib-file<a></h5>
+<div class="overflow-auto" style="max-height:300px;"><pre id="bibfile">...</pre></div>
 
 </div>
 
@@ -163,6 +168,7 @@ check if response is empty, and collect original query...<br/><br/>
 	    <small>%authors_str%</small>
 	</label>
 </div>
+
 
 
 
@@ -372,9 +378,9 @@ catalogsearch = function(squery, token, succfunc) {
 $(function() { 
 
 	// for debugging
-	multiple_responses = [singleresp, singleresp, [], singleresp];
+	//multiple_responses = [singleresp, singleresp, [], singleresp];
 	//console.log(multiple_responses)
-	load_from_resp(multiple_responses);
+	//load_from_resp(multiple_responses);
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -513,20 +519,17 @@ accumulateBibtex = function()
 </script>
 
 
-
-<br/><br/>
-make the following container collapseable:
-
 <div class="container">
+<h5><a href ="#gen_mendeley_api_instr" class="btn btn-secondary" data-toggle="collapse">Get API information (click here to toggle.)</a></h5>
+
+<div id="gen_mendeley_api_instr" style="" class="collapse">
+<br/><br/>
 
 Get the key:
-
 <pre><code>
 
 https://api.mendeley.com/oauth/authorize?client_id=9513&redirect_uri=http:%2F%2Fcitavy.de&response_type=code&scope=all&state=21365353332730.97845
-
 => http://citavy.de/?code=8ekzFqxwdQV5btz4g00W5aSb4S4&state=213653957730.97845
-
 
 succfunc1 = function(data){
   console.log("received data")
@@ -547,12 +550,13 @@ $.ajax({
 
 => gives you the access_token i.e. 'MSwxNjEyNTcwOTg0OTU1LDYxMDgzMTI4MSw5NTEzLGFsbCwsLGI2NzYxMGQ0MjIxN2EwNGZiZTY4MTIyOGM0YzIxNWFkYTdlZGd4cnFiLDVhYTM4NGFlLTA3N2YtMzRhYi1hZDVkLTRlY2QxMmY2MjZkNyx6OTJCaFBzSjl0ZEpzTndCR2E5Qm0xT1hyLXc'
 
-
 http://api.crossref.org/works/10.5555/12345678/transform/application/x-bibtex
-
 
 </code></pre>
 </div>
+</div>
+
+
 
 
 

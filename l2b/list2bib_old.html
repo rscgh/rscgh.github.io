@@ -53,11 +53,6 @@
 
 		.list-group.list-group-root > .list-group > .list-group-item {
 		    padding-left: 30px;
-		    cursor: pointer;
-		}
-
-		.list-group.list-group-root > .list-group > .list-group-item:hover {
-		    background: #fffdf6;
 		}
 
 		.list-group.list-group-root > .list-group > .list-group > .list-group-item {
@@ -71,8 +66,6 @@
 
 		.list-group-item.iselected {background: #FAF4DE}
 		.mainpaper {background: #EEE}
-		.paper_not_found {background: #ded8d8}
-		.paper_not_found:hover{background: #ded8d8}
 
 		
 	 </style>
@@ -82,13 +75,8 @@
 
 <div class="container">
 
-	<br/>
-	<h3>Text2Bib</h3>
-	<h5>A tool for the generation of bib-tex files based on lines of text containing information regarding a single paper.</h5	>
-
-	<p>The mendeley API is used to query by the given paper name, authors etc. </p>
-	<p>In a second step, the returned doi's are used to get the bib-style entries from api.crossref.org </p>
-	<p>Do not overdo request, as I think both APIs might eventually refuse service to your IP when too many requests are received. (usually one request per paper is done. If you have many paper queries, then one button press can lead to alot of requests.) </p>
+	<br/><br/>
+	<p>Hello, lets do something.</p>
 
 	<div class="form-group">
 	  <label for="token">The token, see below:</label>
@@ -113,18 +101,15 @@
 </div>
 </div>
 
-<p>
-Now <a href="#make_bib" id="make_bib_btn"> make me bibtex </a> and then 
-<a href="#down_bib" id="bib_download" > ... </a>
-</p>
-
-<h5>Future todos:</h5	>
-
-
+<p>Now <a href="#make_bib" id="make_bib_btn"> make me bibtex </a>.</p>
 Also add buttion to say refine query later / refine query right now and do this single one again<br/>
-
+list also items that didnt show up <br/>
+Also add a non option <br/>
 make the submit button better <br/>
 check if response is empty, and collect original query...<br/><br/>
+
+<p>Now <a href="#make_bib" id="bib_download" > Download it </a>.</p>
+
 
 <div class="overflow-auto" style="max-height:300px;"><pre id="bibfile">...</pre></div>
 
@@ -138,7 +123,7 @@ check if response is empty, and collect original query...<br/><br/>
 	<small class="mb-1" style="color:darkred;">%original_req%</small>
     <div class="d-flex w-100 justify-content-between">
       <p class="mb-1">%title%</p>
-      <small>%journal_source%, %year%</small>
+      <small>%year%</small>
     </div>
     <small class="authorsmall">%authors_str%</small>
   </a>
@@ -147,18 +132,11 @@ check if response is empty, and collect original query...<br/><br/>
   </div>
 </div>
 
-<div id="template_paper_not_found" style="display: none;">
-<a class="list-group-item list-group-item-action paper_not_found" aria-current="true">
-	<small class="mb-1" style="color:darkred;">%original_req%</small>
-</a>
-</div>
-
-
 <div id="template_paper_option" style="display: none;">
 	<label class="list-group-item paper-option%iselected%" itemnr="%itemnr%" target="paper%pid%">
 	    <div class="d-flex w-100 justify-content-between">
 	      <p class="mb-1">%title%</p>
-	      <small>%journal_source%, %year%</small>
+	      <small>%year%</small>
 	    </div>
 	    <small>%authors_str%</small>
 	</label>
@@ -200,7 +178,7 @@ function repltemplate( templateid, data ){
 
 
 
-//////////////////////////////////////////////////////////////////////////
+/////////////
 // update the currently selected paper 
 
 
@@ -208,30 +186,20 @@ update_paper = function(pid, elementn){
 
 	//singleresp = allresp[pid];
 	console.log("update " + pid +"-" + elementn)
-  
-  
-  
-	authors_str="No author."
-  title_str = "Do not include any paper for this query."
-  year_str = ""
-  journal_source = "";
 
-  if (elementn != -1){
-		paper = all_resp[pid][elementn]
-	  authors_str=make_auth_str(paper.authors)
-		title_str = paper.title //+ " <b>" + paper.year +"</b>"
-		year_str = paper.year
-		journal_source = paper.source
-	}
+	paper = all_resp[pid][elementn]
+    authors_str=make_auth_str(paper.authors)
 
+	title_str = paper.title //+ " <b>" + paper.year +"</b>"
 	$('#paper'+pid +' > small.authorsmall').html(authors_str);
 	$('#paper'+pid +' > div > p').html(title_str);
-	$('#paper'+pid +' > div > small').html( journal_source + ", "  + year_str);
 
 	selected_paper[pid] = elementn;
 }
 
-// function to create the authors string
+
+/////////////
+// update the currently selected paper 
 
 make_auth_str = function(authors){
 	authors_str="";
@@ -252,69 +220,41 @@ make_auth_str = function(authors){
 
 
 
-//////////////////////////////////////////////////////////////////////////
+/////////////
 // load and append the papers of a response
 
 
 load_from_resp = function(respones, orig_queries){ 
-	// loads a list of responses
-	// called by catalogsearch as load_from_resp([resp], [this.squery]); 
-	// in this case it is effectively used to load a single paper query, corresponding to a single line of the papers list
-  
-  // check how many papers have been loaded previously
   prevnr = all_resp.length;
-  // add the new reponses to all the previous ones
   all_resp = all_resp.concat(respones);
-  // and also make sure the indexing array is updated
   selected_paper = selected_paper.concat(new Array(respones.length).fill(0));
 
   allcont="";
+  //resp=[singleresp, singleresp]
   
-  
-	for (var pid = 0; pid < respones.length; pid++) 
+  /////  check if response is empty, and collect original query...
+
+  for (var pid = 0; pid < respones.length; pid++) 
   {	
   	realpid = prevnr+pid;
-
-  	// sometimes we load things not directly returned from a query
-    // in this case orig_queries will be undefined.
-  	orq = (typeof orig_queries !== 'undefined') ? ((orig_queries.length>pid) ? orig_queries[pid] : "no request") : "no request";
-
-  	// check if no paper was returned by the query; if so, add dummy item
-  	if (respones[pid].length<=0) {
-
-  		oreq_text = "No paper found for: '" + orq + "' (and hence excluded)."
-  		outerPaper_not_found = repltemplate("template_paper_not_found", {"innerPapers": innerPapers,"pid":realpid, "original_req": oreq_text});
-  		allcont = allcont+outerPaper_not_found;
-  		// do not do the rest of the function then
-  		continue;
-  	}
-
-  	// actually there are some entries for the current query
+  	if (respones[pid].length<=0) {continue;}
   	innerPapers="";
-  	for (var j = 0; j < respones[pid].length; j++) 
-  	{
+  	for (var j = 0; j < respones[pid].length; j++) {
   		paper = respones[pid][j]
   		authors_str =  make_auth_str(paper.authors)
   		iselecteds = ""; if(j==0){ iselecteds = " iselected"};
-  		xxx=repltemplate("template_paper_option", {"itemnr": j,"authors_str":authors_str, "title":paper.title, "year":paper.year, "pid": realpid , "iselected": iselecteds, "journal_source": paper.source})
+  		xxx=repltemplate("template_paper_option", {"itemnr": j,"authors_str":authors_str, "title":paper.title, "year":paper.year, "pid": realpid , "iselected": iselecteds})
   		innerPapers=innerPapers+xxx;
   	}
 
-  	// add also a "dont include any of these results" option:
-  	none_option_item = repltemplate("template_paper_option", {"itemnr": -1,"authors_str":"", "title":"None of the options are correct. Do not include this paper.", "year":"", "pid": realpid , "iselected": " none_option_item", "journal_source": ""})
-  	// the non-option class may be used for styling, and then itemnr needs to be -1
-  	// as this is used by accumulateBibtex and update_paper as indicator for a voluntary missing selection.
-    innerPapers=innerPapers+none_option_item;
+  	orq = (typeof orig_queries !== 'undefined') ? ((orig_queries.length>pid) ? orig_queries[pid] : "no request") : "no request";
 
-    // then add the entire group to it
-  	outerPaper = repltemplate("template_paper", {"innerPapers": innerPapers,"pid":realpid, "authors_str": make_auth_str(respones[pid][0].authors), "title": respones[pid][0].title, "year": respones[pid][0].year,"original_req": orq, "journal_source": respones[pid][0].source});
+  	outerPaper = repltemplate("template_paper", {"innerPapers": innerPapers,"pid":realpid, "authors_str": make_auth_str(respones[pid][0].authors), "title": respones[pid][0].title, "year": respones[pid][0].year,"original_req": orq});
   	allcont = allcont+outerPaper;
   }
-  
 
   $("#superlist").append(allcont);
 
-  // add all the onclick functionality to the paper options
   $(".paper-option").unbind('click');
   $(".paper-option").on('click', function(ev) {
   	$(this).siblings(".paper-option").removeClass("iselected");
@@ -322,26 +262,69 @@ load_from_resp = function(respones, orig_queries){
   	itmnr = $(this).attr("itemnr");
   	ev.preventDefault();
   	ev.stopImmediatePropagation();
-		tid=$(this).attr("target").substring(5)
-		console.log(tid)
-
-    if ($(this).hasClass("none_option_item")){
-      
-    	// mabe make some #paper+tid have a different background
-    }
-
-		update_paper(tid,itmnr)
-		selected_paper[tid] = itmnr; // happens already as part of update paper
-
-		console.log(selected_paper);
-		//$("#paper"+tid).addClass("collapse");
-		//$("#paper"+tid).attr("aria-expanded", "false");
-		//$("#paper"+tid).collapse();
-		
-		//$("#paper-items-"+tid).removeClass("show");
-		$("#paper-items-"+tid).collapse('hide');
+	tid=$(this).attr("target").substring(5)
+	console.log(tid)
+	update_paper(tid,itmnr)
+	selected_paper[tid] = itmnr;
+	console.log(selected_paper);
+	//$("#paper"+tid).addClass("collapse");
+	//$("#paper"+tid).attr("aria-expanded", "false");
+	//$("#paper"+tid).collapse();
+	$("#paper-items-"+tid).removeClass("show");
   });
 };
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// ONLOAD (?)
+
+$(function() { 
+
+
+//////////////////////////////////////////////////////////////////////////
+// get the token from mendeley
+
+
+
+queryString = window.location.search;
+console.log(queryString);
+urlParams = new URLSearchParams(queryString);
+
+ptoken = urlParams.get('token')
+if (ptoken!=null) {token = ptoken; document.getElementById("token").value = token;}
+
+
+mendeley_code = urlParams.get('code');	
+// if nothing is delivered yet, redirect the usr to login
+if (mendeley_code == null && ptoken==null) {
+	mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9578&redirect_uri=https:%2F%2Frscgh.github.io/l2b/list2bib.html&response_type=code&scope=all&state=' + Math.random()*10**13
+	login_auth_msg = '<p>Hi, welcome to this webpage, please visit <a id="link_to_mendeley" href="'+ mend_url + '">mendeley</a> and log into your account. This is required to use their API. afterwards you will be redirected here again, and an authorization code will be passed along. If you already have generated a token and just refershed this page, then no need to do this.</p>'
+
+	$('div.container').first().prepend(login_auth_msg);
+}
+else if (ptoken==null)
+{
+// if we already have the code
+$.ajax({
+  type: "POST",
+  url: "https://api.mendeley.com/oauth/token",
+  data: {'grant_type': 'authorization_code', 'code': mendeley_code ,'redirect_uri': 'https://rscgh.github.io/l2b/list2bib.html'},
+  success: function(data) { 
+  	token = data['access_token'];
+  	document.getElementById("token").value = token;
+  	window.location.search = "?token=" + token;	// make it empty so we dont get an error upon refresh
+  },
+  error: function(data){ document.getElementById("token").value = "Error " + data['error_description']; console.log(data) },
+  beforeSend : function(xhr) {
+  	xhr.setRequestHeader ("Authorization", "Basic " + btoa("9578:u49WPtus5JKh2cq6")); // old: "9513:xFE0kqs5Z21k5vqd"
+  	xhr.setRequestHeader ("Content-Type", "application/x-www-form-urlencoded");
+  },
+});
+
+// token: // 'MSwxNjEyNTcwOTg0OTU1LDYxMDgzMTI4MSw5NTEzLGFsbCwsLGI2NzYxMGQ0MjIxN2EwNGZiZTY4MTIyOGM0YzIxNWFkYTdlZGd4cnFiLDVhYTM4NGFlLTA3N2YtMzRhYi1hZDVkLTRlY2QxMmY2MjZkNyx6OTJCaFBzSjl0ZEpzTndCR2E5Qm0xT1hyLXc'
+}
+
 
 
 
@@ -356,99 +339,38 @@ catalogsearch = function(squery, token, succfunc) {
         	xhr.setRequestHeader("Accept", "application/vnd.mendeley-document.1+json");
         }, 
         "squery" : squery,
-        success: function(resp, status, xhr){
-        	console.log("Query: " + this.squery); 
-        	console.log(resp); 
-        	load_from_resp([resp], [this.squery]); 
-        }
+        success: function(resp, status, xhr){console.log("Query: " + this.squery); console.log(resp); load_from_resp([resp], [this.squery]); }
 	})
 }
 
 
 
 //////////////////////////////////////////////////////////////////////////
-// ONLOAD (?)
+// add the submit button functionality
 
-$(function() { 
+$('button.querybutton').on('click', function() {
+    var tis = $(this);
+    //if(tis.hasClass('active') || tis.hasClass('success')) {  return false;}
+    paperstext = document.getElementById("comment").value;
+    token = document.getElementById("token").value;
+    paperlines = paperstext.split(/\r?\n/)
 
-	// for debugging
-	multiple_responses = [singleresp, singleresp, [], singleresp];
-	//console.log(multiple_responses)
-	load_from_resp(multiple_responses);
+    //console.log(paperlines)
 
+    for (var pn = 0; pn < paperlines.length; pn++) 
+    {	
+    	//console.log("Dada" + paperlines[pn])
+    	if ($.trim(paperlines[pn])=="") {continue;}
+    	setTimeout(function(xx){
+    		console.log("Search: " + paperlines[xx])
+    		catalogsearch(paperlines[xx], token, 0)
+    	}, 100 +(pn*10), pn);
+    	//}, 200, pn);
+    }
 
-	//////////////////////////////////////////////////////////////////////////
-	// get the token from mendeley
+  });
 
-
-
-	queryString = window.location.search;
-	console.log(queryString);
-	urlParams = new URLSearchParams(queryString);
-
-	ptoken = urlParams.get('token')
-	if (ptoken!=null) {token = ptoken; document.getElementById("token").value = token;}
-
-
-	mendeley_code = urlParams.get('code');	
-	// if nothing is delivered yet, redirect the usr to login
-	if (mendeley_code == null && ptoken==null) {
-		mend_url = 'https://api.mendeley.com/oauth/authorize?client_id=9578&redirect_uri=https:%2F%2Frscgh.github.io/l2b/list2bib.html&response_type=code&scope=all&state=' + Math.random()*10**13
-		login_auth_msg = '<p>Hi, welcome to this webpage, please visit <a id="link_to_mendeley" href="'+ mend_url + '">mendeley</a> and log into your account. This is required to use their API. afterwards you will be redirected here again, and an authorization code will be passed along. If you already have generated a token and just refershed this page, then no need to do this.</p>'
-
-		$('div.container').first().prepend(login_auth_msg);
-	}
-	else if (ptoken==null)
-	{
-	// if we already have the code
-	$.ajax({
-	  type: "POST",
-	  url: "https://api.mendeley.com/oauth/token",
-	  data: {'grant_type': 'authorization_code', 'code': mendeley_code ,'redirect_uri': 'https://rscgh.github.io/l2b/list2bib.html'},
-	  success: function(data) { 
-	  	token = data['access_token'];
-	  	document.getElementById("token").value = token;
-	  	window.location.search = "?token=" + token;	// make it empty so we dont get an error upon refresh
-	  },
-	  error: function(data){ document.getElementById("token").value = "Error " + data['error_description']; console.log(data) },
-	  beforeSend : function(xhr) {
-	  	xhr.setRequestHeader ("Authorization", "Basic " + btoa("9578:u49WPtus5JKh2cq6")); // old: "9513:xFE0kqs5Z21k5vqd"
-	  	xhr.setRequestHeader ("Content-Type", "application/x-www-form-urlencoded");
-	  },
-	});
-
-	// token: // 'MSwxNjEyNTcwOTg0OTU1LDYxMDgzMTI4MSw5NTEzLGFsbCwsLGI2NzYxMGQ0MjIxN2EwNGZiZTY4MTIyOGM0YzIxNWFkYTdlZGd4cnFiLDVhYTM4NGFlLTA3N2YtMzRhYi1hZDVkLTRlY2QxMmY2MjZkNyx6OTJCaFBzSjl0ZEpzTndCR2E5Qm0xT1hyLXc'
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////
-	// add the submit button functionality
-
-	$('button.querybutton').on('click', function() {
-	    var tis = $(this);
-	    //if(tis.hasClass('active') || tis.hasClass('success')) {  return false;}
-	    paperstext = document.getElementById("comment").value;
-	    token = document.getElementById("token").value;
-	    paperlines = paperstext.split(/\r?\n/)
-
-	    //console.log(paperlines)
-
-	    for (var pn = 0; pn < paperlines.length; pn++) 
-	    {	
-	    	//console.log("Dada" + paperlines[pn])
-	    	if ($.trim(paperlines[pn])=="") {continue;}
-	    	setTimeout(function(xx){
-	    		console.log("Search: " + paperlines[xx])
-	    		catalogsearch(paperlines[xx], token, 0)
-	    	}, 100 +(pn*10), pn);
-	    	//}, 200, pn);
-	    }
-
-	});
-
-
-
-});	/// end onload ...
+});
 
 
 
@@ -456,57 +378,36 @@ $(function() {
 // postprocessing of the selection for the selection of the bibtex file
 
 bibtexfile="";
-num_of_papers_in_bibtexfile = 0;
-
 $('#make_bib_btn').on('click', function() {
 	console.log("do accumulation")
 	accumulateBibtex();
 });
 //
 
-accumulateBibtex = function()
+accumulateBibtex = function(){
+bibtexfile="";
+for (var pn = 0; pn < all_resp.length; pn++) 
 {
-	bibtexfile="";
-	num_of_papers_in_bibtexfile = 0;
-	for (var pn = 0; pn < all_resp.length; pn++) 
-	{ 
-
-		// if no paper was actually returned for the query, then skip it. 
-		if (all_resp[pn].length == 0){ continue;}
-	  
-	  spn = selected_paper[pn]
-	  // similiarly, if the selected paper is the "None" item, then skip it too.
-		if (spn == -1){ continue;}
-
-		paper = all_resp[pn][spn];
-		console.log(all_resp[pn].length)
-		console.log(paper)
-		doi = paper.identifiers.doi//'10.1073/pnas.1815129116'
-		console.log(doi)
-		curl = 'https://api.crossref.org/works/'+doi+'/transform/application/x-bibtex'
-		$.ajax({ url: curl,
-		    beforeSend: function(xhr) { 
-		    	xhr.setRequestHeader("Accept", "application/x-bibtex");
-		    }, 
-		    success: function(resp, status, xhr)
-		    {
-		    	// currently we have no error handling ...
-
-		    	console.log(resp);
-		    	// append the response to the current bib-text file
-		    	// and hope that there wont be any racing condition ...
-		    	// maybe see https://stackoverflow.com/questions/47781716/sum-values-from-multiple-ajax-requests
-		    	bibtexfile = bibtexfile + "\n"+ resp; 
-		    	num_of_papers_in_bibtexfile = num_of_papers_in_bibtexfile+1;
-		    	$('#bib_download').attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(bibtexfile))
-					$('#bib_download').attr('download', "new_lib.bib");
-					$('#bib_download').html("download .bib file with all [" + num_of_papers_in_bibtexfile.toString() + "] items.");
-
-					$('#bibfile').html(bibtexfile);
-				}
-		})
-	} // end for all papers.
-
+	if (all_resp[pn].length == 0){ continue;}
+	paper = all_resp[pn][selected_paper[pn]];
+	console.log(all_resp[pn].length)
+	console.log(paper)
+	doi = paper.identifiers.doi//'10.1073/pnas.1815129116'
+	console.log(doi)
+	curl = 'https://api.crossref.org/works/'+doi+'/transform/application/x-bibtex'
+	$.ajax({ url: curl,
+	    beforeSend: function(xhr) { 
+	    	xhr.setRequestHeader("Accept", "application/x-bibtex");
+	    }, 
+	    success: function(resp, status, xhr)
+	    {
+	    	console.log(resp);bibtexfile = bibtexfile + "\n"+ resp; 
+	    	$('#bib_download').attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(bibtexfile))
+			$('#bib_download').attr('download', "new_lib.bib");
+			$('#bibfile').html(bibtexfile);
+		}
+	})
+}
 } // end accumulateBibtex function
 
 
